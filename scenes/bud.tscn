@@ -2,14 +2,22 @@
 
 [ext_resource type="Script" path="res://scripts/bud.gd" id="1_nxxry"]
 
-[node name="Bud" type="Node2D" node_paths=PackedStringArray("Line")]
+[node name="Bud" type="Node2D"]
 script = ExtResource("1_nxxry")
-Line = NodePath("Line2D")
+DO_DRAW_CIRCLE = true
+CIRCLE_RADIUS = 2.5
 
 [node name="Line2D" type="Line2D" parent="."]
-points = PackedVector2Array(1, -2)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Line2D"]
+
+[node name="Area2D" type="Area2D" parent="Line2D/StaticBody2D"]
 
 [node name="ColorRect" type="ColorRect" parent="."]
+visible = false
 offset_right = 10.0
 offset_bottom = 10.0
 color = Color(0, 0, 0, 1)
+
+[node name="RayCast2D" type="RayCast2D" parent="."]
+visible = false

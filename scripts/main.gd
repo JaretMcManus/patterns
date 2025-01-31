@@ -6,17 +6,19 @@ extends Node2D
 
 @export_group("angle")
 @export var default_angle = deg_to_rad(45)
-@export var angle_var = .4
+@export var angle_var = .9
 
 var Bud_scene = preload("res://scenes/bud.tscn")
 var root: Bud
 var viable_buds: Array[Bud] = []
+
 
 func _ready() -> void:
 	## Add root node to middle of screen
 	root = Bud_scene.instantiate()
 	root.position = Vector2(get_viewport().size.x / 2, get_viewport().size.y / 2)
 	add_child(root)
+	root.queue_redraw()
 	
 	## Add a dummy root parent so root has a valid direction
 	var dummy = Bud_scene.instantiate()
@@ -27,8 +29,16 @@ func _ready() -> void:
 	
 	## Add root to viable buds list
 	viable_buds.append(root)
-
-
+	
+	#var timer := Timer.new()
+	#add_child(timer)
+	#timer.wait_time = .6
+	#timer.connect("timeout", _on_timeout)
+	#timer.start()
+	
+func _on_timeout():
+	calculate_next_line()
+	
 func _input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed("ui_accept"):
 		calculate_next_line()
@@ -42,8 +52,13 @@ func calculate_next_line() -> void:
 	if randi() % 2 == 0:
 		new_angle *= -1
 	
-	var child = root.spawn_child(new_length, new_angle)
-	add_child(child)
+	## get random viable node
+	var off_bud = viable_buds.pick_random()
+	var child = off_bud.spawn_child(new_length, new_angle)
+	if child:
+		viable_buds.append(child)
+		add_child(child)
+	else: print("failed to create child")
 
 
 func randomize_value(default: float, variance: float) -> float:
