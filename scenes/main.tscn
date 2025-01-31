@@ -1,9 +1,17 @@
-[gd_scene load_steps=2 format=3 uid="uid://ca8tnlvh5x2vj"]
+[gd_scene load_steps=4 format=3 uid="uid://ca8tnlvh5x2vj"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_6agsu"]
 
-[node name="Main" type="Node2D"]
+[sub_resource type="Theme" id="Theme_tjyet"]
+/colors/f = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_s1kdg"]
+font_size = 31
+font_color = Color(1.92523e-06, 0, 0.66623, 1)
+
+[node name="Main" type="Node2D" node_paths=PackedStringArray("node_label")]
 script = ExtResource("1_6agsu")
+node_label = NodePath("Label")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = -1
@@ -15,3 +23,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.808998, 0.808998, 0.808998, 1)
+
+[node name="Label" type="Label" parent="."]
+offset_right = 272.0
+offset_bottom = 44.0
+theme = SubResource("Theme_tjyet")
+label_settings = SubResource("LabelSettings_s1kdg")

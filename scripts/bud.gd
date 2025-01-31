@@ -2,33 +2,21 @@ class_name Bud extends Node2D
 
 
 var bud_children: Array[Bud] = []
-var child_areas: Array[Area2D] = []
 var parent: Bud
+var bud_lines: Array[BudLine] = []
 
-#var negative_open: bool = true
-#var positive_open: bool = true
 
 @export_group("Drawing")
 var COLOR: Color = Global.COLOR
-@export_subgroup("Line")
-var Line: Line2D
-@export var LINE_WIDTH: float = 5
-
 @export_subgroup("Circle")
 @export var DO_DRAW_CIRCLE: bool = false
 @export var CIRCLE_RADIUS: float = 4
-
+@export_group("Angle")
 @export var MINIMUM_ANGLE_TO_SIBLING: float = deg_to_rad(30)
 
 
 var Bud_scene = preload("res://scenes/bud.tscn")
-
-func _ready() -> void:
-	Line = get_children().filter(
-		func(child): return child is Line2D
-	)[0]
-	Line.default_color = COLOR
-	Line.width = LINE_WIDTH
+var Bud_line_scene = preload("res://scenes/bud_line.tscn")
 
 
 func spawn_child(length: float, angle: float) -> Bud:
@@ -45,11 +33,7 @@ func spawn_child(length: float, angle: float) -> Bud:
 		var angle_between = acos(child_position_offset.normalized().dot(other_child_offset.normalized()))
 		
 		if angle_between < MINIMUM_ANGLE_TO_SIBLING: return null
-		
 	
-	## Check for collisions
-	
-	 
 	## Make child
 	var child: Bud = Bud_scene.instantiate()
 	child.parent = self
@@ -57,25 +41,34 @@ func spawn_child(length: float, angle: float) -> Bud:
 	child.position = self.position + child_position_offset
 	child.queue_redraw()
 	
-	## Connect Line2d
-	Line.add_point(Vector2.ZERO)
-	Line.add_point(child.position - self.position)
-
-	## Make Collision shape
-	add_collision_segment(self.position, child.position)
+	## Make BudLine
+	var new_bud_line: BudLine = Bud_line_scene.instantiate()
+	self.add_child(new_bud_line)
+	new_bud_line.init(self.position, child.position)
 	
+	## Check for Collisions
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var collisions = new_bud_line.area.get_overlapping_areas()
+	var current_bud_areas = bud_lines.map(func(bl: BudLine): return bl.area)
+	collisions = collisions.filter(func(collided): return collided not in current_bud_areas)
+	
+	if collisions.size() > 0:
+		print("cant create line, COLLISION")
+		new_bud_line.queue_free()
+		child.queue_free()
+		return null
+
+	#debug coloring
+	if Global.debug:
+		Global.last_line.set_default_color(Global.COLOR)
+		new_bud_line.line.set_default_color(Global.DEBUG_COLOR)
+		Global.last_line = new_bud_line.line
+
+	bud_lines.append(new_bud_line)
+	child.bud_lines.append(new_bud_line)
+	new_bud_line.visible = true
 	return child
-
-
-func add_collision_segment(start: Vector2, end: Vector2) -> void:
-	var new_shape = CollisionShape2D.new()
-	$Line2D/StaticBody2D/Area2D.add_child(new_shape)
-	var rect = RectangleShape2D.new()
-	new_shape.position = (end - start) / 2
-	new_shape.rotation = start.direction_to(end).angle()
-	var length = start.distance_to(end)
-	rect.extents = Vector2(length / 2, 10)
-	new_shape.shape = rect
 	
 func _draw() -> void:
 	if DO_DRAW_CIRCLE:

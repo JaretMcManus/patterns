@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://dwtgwey8tsys5"]
+
+[ext_resource type="Script" path="res://scripts/bud_line.gd" id="1_7nldy"]
+
+[node name="BudLine" type="Node2D" node_paths=PackedStringArray("line", "area", "collision_shape")]
+visible = false
+script = ExtResource("1_7nldy")
+line = NodePath("Line2D")
+area = NodePath("Line2D/Area2D")
+collision_shape = NodePath("Line2D/Area2D/CollisionShape2D")
+
+[node name="Line2D" type="Line2D" parent="."]
+width = 2.0
+
+[node name="Area2D" type="Area2D" parent="Line2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Line2D/Area2D"]
