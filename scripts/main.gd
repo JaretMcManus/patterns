@@ -7,7 +7,7 @@ var node_amount: int = 1
 
 @export_group("angle")
 @export var default_angle = deg_to_rad(45)
-@export var angle_var = 0.3
+@export var angle_var = 0.2
 
 @export_group("")
 @export var RETRY_AMOUNT = 3
@@ -15,7 +15,7 @@ var Bud_scene = preload("res://scenes/bud.tscn")
 var root: Bud
 var viable_buds: Array[Bud] = []
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	Global.space_state = get_world_2d().direct_space_state
 	if viable_buds.size() != node_amount:
 		node_amount = viable_buds.size()
@@ -42,12 +42,12 @@ func _ready() -> void:
 	
 	var timer := Timer.new()
 	add_child(timer)
-	timer.wait_time = .25
+	timer.wait_time = .05
 	timer.connect("timeout", _on_timeout)
 	timer.start()
 	
 func _on_timeout():
-	calculate_next_line()
+	get_next_line()
 	
 func _input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed("ui_accept"):
@@ -66,7 +66,10 @@ func calculate_next_line() -> bool:
 		new_angle *= -1
 	
 	## get random viable node
-	var off_bud = viable_buds.pick_random()
+	if viable_buds.size() == 0:
+		print_rich("[color=red]NO VIABLE NODES[/color]")
+		return false
+	var off_bud: Bud = viable_buds.pick_random()
 	for i in range(RETRY_AMOUNT):
 		var child = await off_bud.spawn_child(new_length, new_angle)
 		if child:
